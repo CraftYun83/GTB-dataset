@@ -1,7 +1,9 @@
 import json
 from litemapy import Schematic, Region, BlockState
 
-with open('earth_unfiltered.json') as f:
+schem_name = "target"
+
+with open(f'filtered/{schem_name}.json') as f:
     data = json.load(f)
     f.close()
 
@@ -23,18 +25,18 @@ for i in data:
         blockchanges.append(i)
         types.append(i["data"]["type"])
 
-with open('earth.json', 'w') as jsonfile:
-    json.dump(blockchanges, jsonfile)
-
 # Normalizing coords
 itmin = [min(point[i] for point in coords) for i in range(3)]
-itmax = [max(point[i] for point in coords) for i in range(3)]
+coords = []
 
 for block in blockchanges:
     position = block["data"]["location"]
     position["x"] -= itmin[0]
     position["y"] -= itmin[1]
     position["z"] -= itmin[2]
+    coords.append(list(position.values()))
+
+itmax = [max(point[i] for point in coords) for i in range(3)]
 
 # Mapping state ids to block id
 
@@ -58,8 +60,9 @@ for block in blocks:
 
 # Create schematic
 
-reg = Region(0, 0, 0, itmax[0], itmax[1], itmax[2])
-schem = reg.as_schematic(name="Earth", author="FourMC", description="GTB Dataset")
+reg = Region(0, 0, 0, itmax[0]+1, itmax[1]+1, itmax[2]+1)
+print(itmax)
+schem = reg.as_schematic(name="Garage", author="FourMC", description="GTB Dataset")
 
 # Settings blocks
 
@@ -67,4 +70,4 @@ for j in blockchanges:
     position = j["data"]["location"]
     reg.setblock(position["x"], position["y"], position["z"], BlockState("minecraft:"+typesDict[str(j["data"]["type"])]))
         
-schem.save("earth.litematic")
+schem.save(f"schematics/{schem_name}.litematic")
