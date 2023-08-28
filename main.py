@@ -1,8 +1,6 @@
 import json
 from litemapy import Schematic, Region, BlockState
 
-size = (0, 0, 0)
-
 with open('earth_unfiltered.json') as f:
     data = json.load(f)
     f.close()
@@ -13,27 +11,38 @@ with open('blocks.json') as b:
 
 types = []
 typesDict = {}
+coords = []
+
+# Lists location of blocks
 
 blockchanges = []
 for i in data:
     if i["meta"]["name"] == "block_change":
         position = i["data"]["location"]
-        position["x"] = position["x"]-150
-        position["y"] = position["y"]
-        position["z"] = position["z"]-150
+        coords.append(list(position.values()))
         blockchanges.append(i)
         types.append(i["data"]["type"])
-        size = (max(size[0], position["x"]+1), max(size[1], position["y"]+1), max(size[2], position["z"]+1))
 
 with open('earth.json', 'w') as jsonfile:
     json.dump(blockchanges, jsonfile)
+
+# Normalizing coords
+itmin = [min(point[i] for point in coords) for i in range(3)]
+itmax = [max(point[i] for point in coords) for i in range(3)]
+
+for block in blockchanges:
+    position = block["data"]["location"]
+    position["x"] -= itmin[0]
+    position["y"] -= itmin[1]
+    position["z"] -= itmin[2]
+
+# Mapping state ids to block id
 
 types = set(types)
 blocks = blocks["blocks"]["block"]
 
 for block in blocks:
     ids = set([*range(blocks[block]["min_state_id"], blocks[block]["max_state_id"]+1)])
-    _id = blocks[block]["numeric_id"]
     intersections = list(ids.intersection(types))
     for i in intersections:
         if len(blocks[block]["states"]) != 0:
@@ -47,8 +56,12 @@ for block in blocks:
         else:
             typesDict[str(i)] = blocks[block]["text_id"]
 
-reg = Region(0, 0, 0, size[0], size[1], size[2])
+# Create schematic
+
+reg = Region(0, 0, 0, itmax[0], itmax[1], itmax[2])
 schem = reg.as_schematic(name="Earth", author="FourMC", description="GTB Dataset")
+
+# Settings blocks
 
 for j in blockchanges:
     position = j["data"]["location"]
