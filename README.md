@@ -1,6 +1,10 @@
 # GTB-dataset
 trying to build a dataset using guess the build builds from hypixel
 
+you can load `pakkit-script.js` in pakkit to detect when a person starts building and finishes building and then it just saves a json file with the `block_change` packets
+
+then u can use `main.py` to convert the json file into a `.litematic` file. then u can use Lite2Edit (https://github.com/GoldenDelicios/Lite2Edit) to convert to `.schem` file. there are also tools like https://puregero.github.io/SchemToSchematic/ to convert `.schem` to `.schematic`
+
 "block_change" packets are weird af, they use the block state ids instead of the block id itself lmao.
 
 the block_change packets pakkit gives u uses block state ids. each block has a range of state ids. block stats (like the block state id range) can be found on https://pokechu22.github.io/Burger/1.9.html
